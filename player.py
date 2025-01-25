@@ -10,10 +10,11 @@ class Player:
         self.angle = angle
         self.speed = PLAYER_SPEED / FPS
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
+        self.sensitivity = MOUSE_SENSITIVITY
 
     def movement(self):
         keys = pygame.key.get_pressed()
-
+        self.mouse_control()
         if keys[pygame.K_w]:
             self.x += self.speed * math.cos(self.angle)
             self.y += self.speed * math.sin(self.angle)
@@ -33,3 +34,9 @@ class Player:
 
     def pos(self):
         return self.x, self.y, self.angle
+
+    def mouse_control(self):
+        if pygame.mouse.get_focused():
+            difference = pygame.mouse.get_pos()[0] - HALF_WIDTH
+            pygame.mouse.set_pos((HALF_WIDTH, HALF_HEIGHT))
+            self.angle += difference * self.sensitivity
