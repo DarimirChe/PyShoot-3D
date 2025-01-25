@@ -14,7 +14,6 @@ class Player:
 
     def movement(self):
         keys = pygame.key.get_pressed()
-        self.mouse_control()
         if keys[pygame.K_w]:
             self.x += self.speed * math.cos(self.angle)
             self.y += self.speed * math.sin(self.angle)
