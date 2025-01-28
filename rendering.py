@@ -15,7 +15,7 @@ class Rendering:
     def raycasting(self, player, MAP):
         x, y, angle = player.pos()
         MAP = MAP.MAP
-
+        collision_walls.clear()
         px = x % 1
         py = y % 1
         ray_angle = angle - FOV / 2

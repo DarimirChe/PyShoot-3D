@@ -16,6 +16,7 @@ if __name__ == '__main__':
     play = True
     is_mouse = 1
     mouse_visible = False
+    
     while play:
         pygame.mouse.set_visible(mouse_visible)
         for event in pygame.event.get():
