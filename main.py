@@ -34,5 +34,6 @@ if __name__ == '__main__':
         rendering.raycasting(player, MAP)
         rendering.mini_map(player, MAP)
         rendering.fps(clock)
+        rendering.objects2(player, MAP)
         pygame.display.flip()
         clock.tick(FPS)
