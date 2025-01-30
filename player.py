@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 import math
+from map import MAP
 
 
 class Player:
@@ -11,11 +12,7 @@ class Player:
         self.speed = PLAYER_SPEED / FPS
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
-        self.MAP = []
-
-    def set_map(self, path):
-        with open(path, mode="rt", encoding="utf-8") as txt_map:
-            self.MAP = [list(line) for line in txt_map.read().split()]
+        self.MAP = MAP
 
     def detect_collision(self, dx, dy):
         if self.MAP[int(self.y + dy)][int(self.x + dx)] == "0":
