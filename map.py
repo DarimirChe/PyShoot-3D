@@ -23,9 +23,3 @@ matrix_map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 2],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2]
 ]
-tile = 15
-collision_walls = []
-for j, row in enumerate(matrix_map):
-    for i, char in enumerate(row):
-        if char:
-            collision_walls.append(pygame.Rect(i * tile, j * tile, tile, tile))
