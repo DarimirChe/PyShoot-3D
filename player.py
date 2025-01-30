@@ -1,7 +1,7 @@
 import pygame
 from settings import *
 import math
-from rendering import collision_walls
+from map import collision_walls
 
 
 class Player:

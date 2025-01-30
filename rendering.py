@@ -87,12 +87,11 @@ class Rendering:
 
             ray_angle += delta_angle
 
-
     def sky(self, angle):
-            w = self.textures["Sky"].get_width()
-            sky_offset = -w * (math.degrees(angle) % 360 / 360)
-            self.screen.blit(self.textures["Sky"], (sky_offset, 0))
-            self.screen.blit(self.textures["Sky"], (sky_offset + w, 0))
+        w = self.textures["Sky"].get_width()
+        sky_offset = -w * (math.degrees(angle) % 360 / 360)
+        self.screen.blit(self.textures["Sky"], (sky_offset, 0))
+        self.screen.blit(self.textures["Sky"], (sky_offset + w, 0))
 
     def ground(self):
         pygame.draw.rect(self.screen, (80, 111, 80), (0, HEIGHT / 2, WIDTH, HEIGHT / 2))
