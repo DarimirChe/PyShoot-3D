@@ -1,7 +1,6 @@
 import pygame
 from settings import *
 import math
-from map import matrix_map
 
 
 class Player:
@@ -12,23 +11,19 @@ class Player:
         self.speed = PLAYER_SPEED / FPS
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
-        self.side = 50
-        self.rect = pygame.Rect(self.x, self.y, self.side, self.side)
-        self.collision_walls = collision_walls
+        self.MAP = []
+
+    def set_map(self, path):
+        with open(path, mode="rt", encoding="utf-8") as txt_map:
+            self.MAP = [list(line) for line in txt_map.read().split()]
 
     def detect_collision(self, dx, dy):
-        for i, row in enumerate(matrix_map):
-            for j, char in enumerate(row):
-                if self.y == i and matrix_map[i][j] == 1:
-                    dy = 0
-                if self.x == j and matrix_map[i][j] == 1:
-                    dx = 0
-        self.x += dx
-        self.y += dy
+        if self.MAP[int(self.y + dy)][int(self.x + dx)] == "0":
+            self.x += dx
+            self.y += dy
 
     def movement(self):
         keys = pygame.key.get_pressed()
-        self.rect.center = self.x, self.y
         if keys[pygame.K_w]:
             dx = self.speed * math.cos(self.angle)
             dy = self.speed * math.sin(self.angle)
