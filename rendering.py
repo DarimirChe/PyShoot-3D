@@ -3,6 +3,8 @@ import math
 import pygame
 from settings import *
 
+collision_walls = []
+
 
 class Rendering:
     def __init__(self, screen):
@@ -15,7 +17,6 @@ class Rendering:
     def raycasting(self, player, MAP):
         x, y, angle = player.pos()
         MAP = MAP.MAP
-
         px = x % 1
         py = y % 1
         ray_angle = angle - FOV / 2
@@ -86,11 +87,12 @@ class Rendering:
 
             ray_angle += delta_angle
 
+
     def sky(self, angle):
-        w = self.textures["Sky"].get_width()
-        sky_offset = -w * (math.degrees(angle) % 360 / 360)
-        self.screen.blit(self.textures["Sky"], (sky_offset, 0))
-        self.screen.blit(self.textures["Sky"], (sky_offset + w, 0))
+            w = self.textures["Sky"].get_width()
+            sky_offset = -w * (math.degrees(angle) % 360 / 360)
+            self.screen.blit(self.textures["Sky"], (sky_offset, 0))
+            self.screen.blit(self.textures["Sky"], (sky_offset + w, 0))
 
     def ground(self):
         pygame.draw.rect(self.screen, (80, 111, 80), (0, HEIGHT / 2, WIDTH, HEIGHT / 2))
@@ -107,6 +109,7 @@ class Rendering:
         for row in range(len(MAP)):
             for column in range(len(MAP[row])):
                 pygame.draw.rect(self.screen, "white", (tile * column, tile * row, tile, tile), MAP[row][column] == "0")
+                collision_walls.append(pygame.Rect(tile * column, tile * row, tile, tile))
         pygame.draw.circle(self.screen, "green", (x * tile, y * tile), 5)
         pygame.draw.line(self.screen, "red", (x * tile, y * tile),
                          ((x + 0.5 * math.cos(angle)) * tile, (y + 0.5 * math.sin(angle)) * tile))
