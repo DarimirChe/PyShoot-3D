@@ -11,7 +11,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     MAP = Map()
     MAP.set_map("data/maps/map.txt")
-    player = Player(2, 6, 0)
+    player = Player(2, 6, 0, MAP)
     rendering = Rendering(screen)
     play = True
     is_mouse = 1
