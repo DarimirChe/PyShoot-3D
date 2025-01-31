@@ -30,6 +30,12 @@ class Player:
             self.angle -= self.angle_speed
         if keys[pygame.K_RIGHT]:
             self.angle += self.angle_speed
+        if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+            self.speed += 0.01
+            if self.speed >= 0.07:
+                self.speed = 0.07
+        else:
+            self.speed = PLAYER_SPEED / FPS
 
     def pos(self):
         return self.x, self.y, self.angle

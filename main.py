@@ -7,6 +7,7 @@ import math
 
 if __name__ == '__main__':
     pygame.init()
+    speed = PLAYER_SPEED
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     MAP = Map()
