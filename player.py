@@ -13,11 +13,16 @@ class Player:
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
         self.MAP = MAP.MAP
+        self.map_edge_y = len(self.MAP)
+        self.map_edge_x = len(self.MAP[0])
 
     def detect_collision(self, dx, dy):
-        if self.MAP[int(self.y + dy)][int(self.x + dx)] == "0":
+        if self.MAP[int(self.y)][int(self.x + dx + 0.2)] == "0":
             self.x += dx
+        if self.MAP[int(self.y + 0.2 + dy)][int(self.x)] == "0":
             self.y += dy
+
+
 
     def movement(self):
         keys = pygame.key.get_pressed()
