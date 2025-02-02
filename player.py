@@ -26,21 +26,21 @@ class Player:
 
     def movement(self):
         keys = pygame.key.get_pressed()
-        dx, dy = None, None
         if keys[pygame.K_w]:
             dx = self.speed * math.cos(self.angle)
             dy = self.speed * math.sin(self.angle)
+            self.detect_collision(dx, dy)
         if keys[pygame.K_s]:
             dx = -self.speed * math.cos(self.angle)
             dy = -self.speed * math.sin(self.angle)
+            self.detect_collision(dx, dy)
         if keys[pygame.K_d]:
             dx = -self.speed * math.sin(self.angle)
             dy = self.speed * math.cos(self.angle)
+            self.detect_collision(dx, dy)
         if keys[pygame.K_a]:
             dx = self.speed * math.sin(self.angle)
             dy = -self.speed * math.cos(self.angle)
-
-        if dx is not None and dy is not None:
             self.detect_collision(dx, dy)
 
         if keys[pygame.K_LEFT]:
