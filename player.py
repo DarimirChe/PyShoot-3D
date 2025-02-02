@@ -10,6 +10,7 @@ class Player:
         self.y = y
         self.angle = angle
         self.speed = PLAYER_SPEED / FPS
+        self.running_speed = PLAYER_RUNNING_SPEED
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
 
@@ -34,8 +35,8 @@ class Player:
             self.angle += self.angle_speed
         if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
             self.speed += 0.01
-            if self.speed >= 0.09:
-                self.speed = 0.09
+            if self.speed >= self.running_speed:
+                self.speed = self.running_speed
         else:
             self.speed = PLAYER_SPEED / FPS
 
