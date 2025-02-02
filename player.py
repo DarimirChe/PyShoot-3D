@@ -10,7 +10,7 @@ class Player:
         self.y = y
         self.angle = angle
         self.speed = PLAYER_SPEED / FPS
-        self.running_speed = PLAYER_RUNNING_SPEED
+        self.running_speed = PLAYER_RUNNING_SPEED / FPS
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
 
