@@ -17,31 +17,32 @@ class Player:
         self.map_edge_x = len(self.MAP[0])
 
     def detect_collision(self, dx, dy):
-        if self.MAP[int(self.y)][int(self.x + dx + 0.2)] == "0":
+        radius = 0.1 if dx > 0 else -0.1
+        if self.MAP[int(self.y)][int(self.x + dx + radius)] == "0":
             self.x += dx
-        if self.MAP[int(self.y + 0.2 + dy)][int(self.x)] == "0":
+        radius = 0.1 if dy > 0 else -0.1
+        if self.MAP[int(self.y + dy + radius)][int(self.x)] == "0":
             self.y += dy
-
-
 
     def movement(self):
         keys = pygame.key.get_pressed()
+        dx, dy = None, None
         if keys[pygame.K_w]:
             dx = self.speed * math.cos(self.angle)
             dy = self.speed * math.sin(self.angle)
-            self.detect_collision(dx, dy)
         if keys[pygame.K_s]:
             dx = -self.speed * math.cos(self.angle)
             dy = -self.speed * math.sin(self.angle)
-            self.detect_collision(dx, dy)
         if keys[pygame.K_d]:
             dx = -self.speed * math.sin(self.angle)
             dy = self.speed * math.cos(self.angle)
-            self.detect_collision(dx, dy)
         if keys[pygame.K_a]:
             dx = self.speed * math.sin(self.angle)
             dy = -self.speed * math.cos(self.angle)
+
+        if dx is not None and dy is not None:
             self.detect_collision(dx, dy)
+
         if keys[pygame.K_LEFT]:
             self.angle -= self.angle_speed
         if keys[pygame.K_RIGHT]:
