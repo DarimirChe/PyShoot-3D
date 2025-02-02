@@ -114,9 +114,11 @@ class Rendering:
     def objects(self, player, MAP):
         x, y, player_angle = player.pos()
         for object in objects:
-            ray_angle = math.atan(abs(object[1] - y) / abs(object[0] - x)) #- player_angle
-            if ray_angle:
-                pass
+            #ray_angle = math.atan(abs(object[1] - y) / abs(object[0] - x)) #- player_angle
+            ray_angle = math.atan(abs(object[1] - y) / abs(object[0] - x)) - player_angle
+            ray_angle = (ray_angle + math.pi) % (2 * math.pi) - math.pi  # Нормализация угла
+            if abs(ray_angle) >= FOV / 2:
+                return
             MAP = MAP.MAP
             px = x % 1
             py = y % 1
@@ -165,11 +167,11 @@ class Rendering:
                         if MAP[row][col] != "0":
                             break
             # Ищем ближайщую стену пересечения основываясь на координатах h_Px, h_Py, v_Px, v_Py
-            depth_h = abs(x - h_Px) ** 2 + abs(y - h_Py) ** 2
-            depth_v = abs(x - v_Px) ** 2 + abs(y - v_Py) ** 2
+            depth_h = (x - h_Px) ** 2 + (y - h_Py) ** 2
+            depth_v = (x - v_Px) ** 2 + (y - v_Py) ** 2
             depth = min(depth_v, depth_h)
 
-            object_depth = abs(object[1] - y) ** 2 + abs(object[0] - x) ** 2
+            object_depth = (object[1] - y) ** 2 + (object[0] - x) ** 2
 
             if object_depth < depth:
                 '''
@@ -197,7 +199,6 @@ class Rendering:
             # Проверяем, находится ли объект в поле зрения
             if abs(ray_angle) < FOV / 2:
                 # Проверка на столкновение со стенами
-                depth_h, depth_v = float('inf'), float('inf')
 
                 MAP = MAP.MAP
                 px = x % 1
@@ -249,7 +250,7 @@ class Rendering:
                 # Ищем ближайщую стену пересечения основываясь на координатах h_Px, h_Py, v_Px, v_Py
                 depth_h = abs(x - h_Px) ** 2 + abs(y - h_Py) ** 2
                 depth_v = abs(x - v_Px) ** 2 + abs(y - v_Py) ** 2
-                depth = min(depth_v, depth_h)
+                depth = math.sqrt(min(depth_v, depth_h))
 
                 # Если объект ближе, чем стена, рисуем его
                 if distance_to_object < depth:
@@ -265,7 +266,7 @@ class Rendering:
                     texture_height = t.get_height()
 
                     # Вычисляем смещение для центрирования объекта
-                    offset = (screen_x % 1) * texture_width
+                    #offset = (screen_x % 1) * texture_width
 
                     # Масштабируем текстуру до нужной высоты
                     scaled_texture = pygame.transform.scale(t, (
