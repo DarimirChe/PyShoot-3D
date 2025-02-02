@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 import math
+from map import Map
 
 
 class Player:
@@ -14,6 +15,7 @@ class Player:
 
     def movement(self):
         keys = pygame.key.get_pressed()
+
         if keys[pygame.K_w]:
             self.x += self.speed * math.cos(self.angle)
             self.y += self.speed * math.sin(self.angle)
@@ -32,8 +34,8 @@ class Player:
             self.angle += self.angle_speed
         if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
             self.speed += 0.01
-            if self.speed >= 0.07:
-                self.speed = 0.07
+            if self.speed >= 0.09:
+                self.speed = 0.09
         else:
             self.speed = PLAYER_SPEED / FPS
 
