@@ -2,6 +2,7 @@ import math
 
 import pygame
 from settings import *
+from Weapon import Weapon
 
 
 class Rendering:
@@ -110,3 +111,17 @@ class Rendering:
         pygame.draw.circle(self.screen, "green", (x * tile, y * tile), 5)
         pygame.draw.line(self.screen, "red", (x * tile, y * tile),
                          ((x + 0.5 * math.cos(angle)) * tile, (y + 0.5 * math.sin(angle)) * tile))
+
+    def weapon_show(self, weapon: Weapon, reloading, shooting):
+        if shooting:
+            weapon.set_shot(2)
+            print('2')
+        if reloading:
+            weapon.set_shot(3)
+            print('1')
+        else:
+            weapon.set_shot()
+        image = pygame.image.load(weapon.get_shot()).convert()
+        w, h = image.get_width(), image.get_height()
+        dest = (WIDTH - w, HEIGHT - h)
+        self.screen.blit(image, dest)

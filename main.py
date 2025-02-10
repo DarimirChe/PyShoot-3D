@@ -4,7 +4,7 @@ from settings import *
 from player import Player
 from map import Map
 from rendering import Rendering
-from Weapon import Weapon
+from Weapon import *
 import math
 
 if __name__ == '__main__':
@@ -19,8 +19,10 @@ if __name__ == '__main__':
     play = True
     is_mouse = 1
     mouse_visible = False
-    current_weapon = Weapon('AK-47', 30, 0.5, 5, 23, 30)
-    lastReloadTime = time.clock()
+    shooting = False
+    current_weapon = AK_47(fire_rate=1)
+    lastReloadTime = pygame.time.get_ticks()
+    lastShootTime = pygame.time.get_ticks()
     while play:
         pygame.mouse.set_visible(mouse_visible)
         for event in pygame.event.get():
@@ -34,18 +36,27 @@ if __name__ == '__main__':
                 if pygame.key.get_pressed()[pygame.K_r]:  # перезярдка по нажатию R
                     reloading = True
                     current_weapon.reload_weapon()
-                    lastReloadTime = time.clock()
-            if reloading and event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed() == (1, 0, 0):  # попытка выстрела при выполнении перезарядки
-                pass  # можно сделать подачу сигнала игроку, что идёт перезарядка
+                    lastReloadTime = pygame.time.get_ticks()
+            if reloading and shooting and event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed() == (1, 0, 0):  # попытка выстрела при выполнении перезарядки или выстрела
+                if reloading:
+                    pass  # можно сделать подачу сигнала игроку, что идёт перезарядка
             if not reloading and event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed() == (1, 0, 0):  # выполнение выстрела если не идёт перезарядка
-                if current_weapon.fullness_clip() < 1:
-                    current_weapon.set_fullness_clip(current_weapon.fullness_clip() - 1)
-                elif current_weapon.fullness_clip() == 1:
-                    current_weapon.set_fullness_clip(current_weapon.fullness_clip() - 1)
-                    reloading = True
-                    current_weapon.reload_weapon()
-            if lastReloadTime >= current_weapon.reload_time():  # окончание перезарядки по истечению таймера
+                if shooting:
+                    pass
+                else:
+                    if current_weapon.fullness_clip > 1:
+                        current_weapon.set_fullness_clip(current_weapon.fullness_clip - 1)
+                        shooting = True
+                        lastShootTime = pygame.time.get_ticks()
+                    elif current_weapon.fullness_clip == 1:
+                        current_weapon.set_fullness_clip(current_weapon.fullness_clip - 1)
+                        reloading = True
+                        lastReloadTime = pygame.time.get_ticks()
+                        current_weapon.reload_weapon()
+            if pygame.time.get_ticks() - lastReloadTime >= current_weapon.reload_time * 1000:  # окончание перезарядки по истечению таймера
                 reloading = False
+            if pygame.time.get_ticks() - lastShootTime >= current_weapon.fire_rate * 1000:
+                shooting = False
         player.movement()
         if is_mouse == 1:
             player.mouse_control()
@@ -54,5 +65,6 @@ if __name__ == '__main__':
         rendering.raycasting(player, MAP)
         rendering.mini_map(player, MAP)
         rendering.fps(clock)
+        rendering.weapon_show(current_weapon, reloading, shooting)
         pygame.display.flip()
         clock.tick(FPS)
