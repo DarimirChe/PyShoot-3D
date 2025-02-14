@@ -28,8 +28,10 @@ class Player:
             self.y -= self.speed * math.cos(self.angle)
         if keys[pygame.K_LEFT]:
             self.angle -= self.angle_speed
+            self.angle %= -2 * math.pi
         if keys[pygame.K_RIGHT]:
             self.angle += self.angle_speed
+            self.angle %= -2 * math.pi
 
     def pos(self):
         return self.x, self.y, self.angle
@@ -39,3 +41,4 @@ class Player:
             difference = pygame.mouse.get_pos()[0] - HALF_WIDTH
             pygame.mouse.set_pos((HALF_WIDTH, HALF_HEIGHT))
             self.angle += difference * self.sensitivity
+        self.angle %= -2 * math.pi

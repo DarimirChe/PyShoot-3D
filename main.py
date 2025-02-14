@@ -32,7 +32,7 @@ if __name__ == '__main__':
         rendering.sky(player.angle)
         rendering.ground()
         rendering.raycasting(player, MAP)
-        rendering.objects2(player, MAP)
+        rendering.objects(player, MAP)
         rendering.mini_map(player, MAP)
         rendering.fps(clock)
         pygame.display.flip()
