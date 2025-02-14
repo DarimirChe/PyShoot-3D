@@ -4,6 +4,8 @@ import pygame
 from settings import *
 from Weapon import Weapon
 
+frame_count, last_time = 0, 0
+
 
 class Rendering:
     def __init__(self, screen):
@@ -112,16 +114,40 @@ class Rendering:
         pygame.draw.line(self.screen, "red", (x * tile, y * tile),
                          ((x + 0.5 * math.cos(angle)) * tile, (y + 0.5 * math.sin(angle)) * tile))
 
-    def weapon_show(self, weapon: Weapon, reloading, shooting):
+    def weapon_show(self, weapon: Weapon, reloading, shooting, time):
+        global frame_count
+        global last_time
         if shooting:
-            weapon.set_shot(2)
             print('2')
+            if time - last_time >= weapon.time_per_frame_s:
+                weapon.set_shot(1, 's')
         if reloading:
-            weapon.set_shot(3)
+            if frame_count < len(weapon.r_t):
+                weapon.set_shot(frame_count, 'r')
+            else:
+                frame_count = 0
             print('1')
+            if time - last_time >= weapon.time_per_frame_r:
+                frame_count += 1
         else:
             weapon.set_shot()
-        image = pygame.image.load(weapon.get_shot()).convert()
+        last_time = time
+        image = weapon.get_shot()
         w, h = image.get_width(), image.get_height()
         dest = (WIDTH - w, HEIGHT - h)
         self.screen.blit(image, dest)
+
+    def w_f_c(self, weapon: Weapon, reloading):
+        font1 = pygame.font.Font(None, 25)
+        font2 = pygame.font.Font(None, 25)
+        w_n = font2.render(f'{weapon.get_name()}', True, (255, 250, 0))
+        f = weapon.fullness_clip
+        m_f = weapon.max_F_C
+        ammo = font1.render(f'{f}/{m_f}', True, (255, 250, 0))
+        l = 45
+        if reloading:
+            ammo = font1.render('Reloading', True, (255, 250, 0))
+            l = 90
+        pygame.draw.line(self.screen, (250, 250, 0), (0, HEIGHT - 29), (l, HEIGHT - 29), width=3)
+        self.screen.blit(w_n, (0, HEIGHT - 55))
+        self.screen.blit(ammo, (0, HEIGHT - 25))

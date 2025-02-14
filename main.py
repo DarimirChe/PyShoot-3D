@@ -3,7 +3,7 @@ import time
 from settings import *
 from player import Player
 from map import Map
-from rendering import Rendering
+from rendering import Rendering, frame_count
 from Weapon import *
 import math
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     is_mouse = 1
     mouse_visible = False
     shooting = False
-    current_weapon = AK_47(fire_rate=1)
+    current_weapon = AK_47()
     lastReloadTime = pygame.time.get_ticks()
     lastShootTime = pygame.time.get_ticks()
     while play:
@@ -53,18 +53,21 @@ if __name__ == '__main__':
                         reloading = True
                         lastReloadTime = pygame.time.get_ticks()
                         current_weapon.reload_weapon()
-            if pygame.time.get_ticks() - lastReloadTime >= current_weapon.reload_time * 1000:  # окончание перезарядки по истечению таймера
+            if pygame.time.get_ticks() - lastReloadTime >= current_weapon.reload_time * 200:  # окончание перезарядки по истечению таймера
                 reloading = False
-            if pygame.time.get_ticks() - lastShootTime >= current_weapon.fire_rate * 1000:
+                frame_count = 0
+            if pygame.time.get_ticks() - lastShootTime >= current_weapon.fire_rate * 200:
                 shooting = False
+                frame_count = 0
         player.movement()
         if is_mouse == 1:
             player.mouse_control()
         rendering.sky(player.angle)
         rendering.ground()
         rendering.raycasting(player, MAP)
+        rendering.weapon_show(current_weapon, reloading, shooting, pygame.time.get_ticks())
         rendering.mini_map(player, MAP)
         rendering.fps(clock)
-        rendering.weapon_show(current_weapon, reloading, shooting)
+        rendering.w_f_c(current_weapon, reloading)
         pygame.display.flip()
         clock.tick(FPS)
