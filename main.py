@@ -43,6 +43,6 @@ if __name__ == '__main__':
         current_weapon.weapon_show(screen)
         rendering.mini_map(player, MAP)
         rendering.fps(clock)
-        rendering.weapon_fullness_clip(current_weapon)
+        current_weapon.weapon_fullness_clip(screen)
         pygame.display.flip()
         clock.tick(FPS)
