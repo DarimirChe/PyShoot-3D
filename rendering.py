@@ -57,8 +57,14 @@ class Rendering:
     def objects(self, player, MAP):
         x, y, angle = player.pos()
 
+        sorted_objects = []
         for obj in objects:
-            obj_x, obj_y = obj[0], obj[1]
+            obj_x, obj_y = obj.pos()
+            sorted_objects.append([obj, (obj_y - y) ** 2 + (obj_x - x) ** 2])
+        sorted_objects.sort(key=lambda x: x[1], reverse=True)
+
+        for obj in sorted_objects:
+            obj_x, obj_y = obj[0].pos()
 
             # Вычисляем угол к объекту
             ray_angle = math.atan2(obj_y - y, obj_x - x)
@@ -70,14 +76,13 @@ class Rendering:
             if abs(delta_angle) < FOV / 2:
                 depth = self.ray_cast(player, MAP, ray_angle)[0]
                 # Вычисляем расстояние до объекта
-                object_depth = math.sqrt((obj[1] - y) ** 2 + (obj[0] - x) ** 2)
+                object_depth = math.sqrt(obj[1])
 
                 if object_depth <= depth:
-                    proj_height = PROJ_COEFF / object_depth
-
                     # Вычисляем положение объекта на экране
                     screen_x = (delta_angle + (FOV / 2)) * (WIDTH / FOV)
-
+                    obj[0].draw(self.screen, object_depth, screen_x, x, y)
+                    '''
                     t = pygame.image.load('data/textures/objects/barrel.png')
                     texture_width = t.get_width()
                     texture_height = t.get_height()
@@ -89,6 +94,7 @@ class Rendering:
                     self.screen.blit(
                         scaled_texture, (screen_x - scaled_texture.get_width() / 2, HEIGHT / 2 - proj_height / 2)
                     )
+                    '''
 
     def ray_cast(self, player, MAP, ray_angle):
         x, y, angle = player.pos()
@@ -144,8 +150,8 @@ class Rendering:
                         texture_v = self.textures[MAP[row][col]]
                         break
         # Ищем ближайщую стену пересечения основываясь на координатах h_Px, h_Py, v_Px, v_Py
-        depth_h = abs(x - h_Px) ** 2 + abs(y - h_Py) ** 2
-        depth_v = abs(x - v_Px) ** 2 + abs(y - v_Py) ** 2
+        depth_h = (x - h_Px) ** 2 + (y - h_Py) ** 2
+        depth_v = (x - v_Px) ** 2 + (y - v_Py) ** 2
         depth, offset, texture = (depth_v, v_Py, texture_v) if depth_v < depth_h else (depth_h, h_Px, texture_h)
         depth = math.sqrt(depth)
         offset %= 1
