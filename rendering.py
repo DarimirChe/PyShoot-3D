@@ -114,13 +114,13 @@ class Rendering:
         pygame.draw.line(self.screen, "red", (x * tile, y * tile),
                          ((x + 0.5 * math.cos(angle)) * tile, (y + 0.5 * math.sin(angle)) * tile))
 
-    def weapon_fullness_clip(self, weapon: Weapon, reloading):
+    def weapon_fullness_clip(self, weapon: Weapon):
         font1 = pygame.font.Font(None, 25)
         font2 = pygame.font.Font(None, 25)
         weapon_name = font2.render(f'{weapon.get_name()}', True, (255, 250, 0))
         ammo = font1.render(f'{weapon.fullness_clip}/{weapon.max_F_C}', True, (255, 250, 0))
         l = 45
-        if reloading:
+        if weapon.reloading:
             ammo = font1.render('Reloading', True, (255, 250, 0))
             l = 90
         pygame.draw.line(self.screen, (250, 250, 0), (0, HEIGHT - 29), (l, HEIGHT - 29), width=3)

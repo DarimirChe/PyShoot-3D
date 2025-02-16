@@ -32,6 +32,7 @@ class Weapon:
 
             else:
                 self.aiming_textures = [pygame.image.load(l) for l in n.iterdir()]
+
         self.current_frame = 0
         self.current_frame_image = self.shoot_textures[0]
         self.delta_frame_reload = len(self.reload_textures) / (self.reload_time * FPS)
@@ -88,6 +89,7 @@ class Weapon:
             if self.shooting:
                 pass
             else:
+                self.current_frame = 0
                 if self.fullness_clip > 1:
                     self.set_fullness_clip(self.fullness_clip - 1)
                     self.shooting = True
@@ -96,11 +98,12 @@ class Weapon:
                     self.reloading = True
 
     def weapon_show(self, screen):
+        s = int(self.current_frame // 1)
         if self.shooting:
-            self.set_frame(self.current_frame // 1)
+            self.set_frame(s, 's')
             self.current_frame += self.delta_frame_shoot
         if self.reloading:
-            self.set_frame(self.current_frame // 1)
+            self.set_frame(s, 'r')
             self.current_frame += self.delta_frame_reload
         else:
             self.set_frame()
@@ -109,6 +112,10 @@ class Weapon:
         dest = (WIDTH - w, HEIGHT - h)
         if ((self.shooting and self.current_frame >= len(self.shoot_textures)) or
                 (self.reloading and self.current_frame >= len(self.reload_textures))):
+            if self.reloading:
+                self.reloading = False
+            elif self.shooting:
+                self.shooting = False
             self.current_frame = 0
         screen.blit(image, dest)
 
@@ -118,4 +125,4 @@ class AK_47(Weapon):
         super().__init__(name, fullness_clip, fire_rate, reload_time, damage, max_F_C, texturs)
 
 
-a = AK_47()
+#a = AK_47()

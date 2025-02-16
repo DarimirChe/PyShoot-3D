@@ -3,7 +3,7 @@ import time
 from settings import *
 from player import Player
 from map import Map
-from rendering import Rendering, frame_count
+from rendering import Rendering
 from weapon import *
 import math
 
@@ -34,6 +34,7 @@ if __name__ == '__main__':
                     mouse_visible = not mouse_visible
                     is_mouse = - is_mouse
         player.movement()
+        current_weapon.movement()
         if is_mouse == 1:
             player.mouse_control()
         rendering.sky(player.angle)
@@ -42,6 +43,6 @@ if __name__ == '__main__':
         current_weapon.weapon_show(screen)
         rendering.mini_map(player, MAP)
         rendering.fps(clock)
-        rendering.weapon_fullness_clip(current_weapon, reloading)
+        rendering.weapon_fullness_clip(current_weapon)
         pygame.display.flip()
         clock.tick(FPS)
