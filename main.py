@@ -11,6 +11,7 @@ if __name__ == '__main__':
     pygame.init()
     speed = PLAYER_SPEED
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('PyShoot 3D')
     clock = pygame.time.Clock()
     MAP = Map()
     MAP.set_map("data/maps/map.txt")
