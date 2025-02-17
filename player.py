@@ -14,8 +14,8 @@ class Player:
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
         self.MAP = MAP.MAP
-        self.map_edge_y = len(self.MAP)
-        self.map_edge_x = len(self.MAP[0])
+        #self.map_edge_y = len(self.MAP)
+        #self.map_edge_x = len(self.MAP[0])
 
     def detect_collision(self, dx, dy):
         radius = 0.1 if dx > 0 else -0.1
