@@ -45,7 +45,13 @@ if __name__ == '__main__':
     running = True
     lvl_list = ['Level 1', 'Level 2', 'Level 3', 'Level 4']
     selected_lvl = 0
-#    fon = pygame.image.load('')
+
+    all_sprites = pygame.sprite.Group()
+    sprite = pygame.sprite.Sprite()
+    fon = pygame.image.load('data/textures/background/background.jpg')
+    sprite.image = fon
+    sprite.rect = sprite.image.get_rect()
+    all_sprites.add(sprite)
 
     font = pygame.font.Font(None, 60)
     button_text = font.render(lvl_list[selected_lvl], True, (255, 255, 255))
@@ -87,6 +93,7 @@ if __name__ == '__main__':
                     else:
                         selected_lvl -= 1
             button_text = font.render(lvl_list[selected_lvl], True, (255, 255, 255))
+        all_sprites.draw(screen)
         if show_play:
             exit_game_button.show_button()
             play_button.show_button()
