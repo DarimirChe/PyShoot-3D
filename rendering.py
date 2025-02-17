@@ -2,82 +2,24 @@ import math
 
 import pygame
 from settings import *
-
-collision_walls = []
+from objects import objects
 
 
 class Rendering:
     def __init__(self, screen):
         self.screen = screen
-        self.textures = {"1": pygame.image.load('data/textures/1.jpg').convert(),
-                         "2": pygame.image.load('data/textures/2.jpg').convert(),
-                         "Sky": pygame.image.load('data/textures/sky.jpg').convert()
+        self.textures = {"1": pygame.image.load('data/textures/walls/1.jpg').convert(),
+                         "2": pygame.image.load('data/textures/walls/2.jpg').convert(),
+                         "Sky": pygame.image.load('data/textures/sky/sky.jpg').convert()
                          }
 
     def raycasting(self, player, MAP):
         x, y, angle = player.pos()
-        MAP = MAP.MAP
-        px = x % 1
-        py = y % 1
+
         ray_angle = angle - FOV / 2
         delta_angle = FOV / NUM_RAYS
         for ray in range(NUM_RAYS):
-            # Горизонтальные стены
-            if math.tan(ray_angle) != 0:
-                if math.sin(ray_angle) > 0:
-                    xi = (1 - py) / math.tan(ray_angle)
-                    dx = 1 / math.tan(ray_angle)
-                    for i in range(len(MAP)):
-                        h_Px = x + xi + dx * i
-                        h_Py = y // 1 + 1 + i
-                        row, col = int(h_Py), int(h_Px // 1)
-                        if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
-                            if MAP[row][col] != "0":
-                                texture_h = self.textures[MAP[row][col]]
-                                break
-                else:
-                    xi = -py / math.tan(ray_angle)
-                    dx = 1 / math.tan(ray_angle)
-                    for i in range(len(MAP)):
-                        h_Px = x + xi - dx * i
-                        h_Py = y // 1 - i
-                        row, col = int(h_Py) - 1, int(h_Px // 1)
-                        if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
-                            if MAP[row][col] != "0":
-                                texture_h = self.textures[MAP[row][col]]
-                                break
-            # Вертикальные стены
-            if math.cos(ray_angle) > 0:
-                yi = (1 - px) * math.tan(ray_angle)
-                dy = math.tan(ray_angle)
-                for i in range(len(MAP[0])):
-                    v_Px = x // 1 + 1 + i
-                    v_Py = y + yi + dy * i
-                    row, col = int(v_Py // 1), int(v_Px)
-                    if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
-                        if MAP[row][col] != "0":
-                            texture_v = self.textures[MAP[row][col]]
-                            break
-            else:
-                yi = px * math.tan(ray_angle)
-                dy = math.tan(ray_angle)
-                for i in range(len(MAP[0])):
-                    v_Px = x // 1 - i
-                    v_Py = y - yi - dy * i
-                    row, col = int(v_Py // 1), int(v_Px) - 1
-                    if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
-                        if MAP[row][col] != "0":
-                            texture_v = self.textures[MAP[row][col]]
-                            break
-
-            # Ищем ближайщую стену пересечения основываясь на координатах h_Px, h_Py, v_Px, v_Py
-            depth_h = abs(x - h_Px) ** 2 + abs(y - h_Py) ** 2
-            depth_v = abs(x - v_Px) ** 2 + abs(y - v_Py) ** 2
-
-            depth, offset, texture = (depth_v, v_Py, texture_v) if depth_v < depth_h else (depth_h, h_Px, texture_h)
-            depth = math.sqrt(depth)
-            offset %= 1
-
+            depth, offset, texture = self.ray_cast(player, MAP, ray_angle)
             depth *= math.cos(angle - ray_angle)
             proj_height = PROJ_COEFF / depth
 
@@ -108,7 +50,96 @@ class Rendering:
         for row in range(len(MAP)):
             for column in range(len(MAP[row])):
                 pygame.draw.rect(self.screen, "white", (tile * column, tile * row, tile, tile), MAP[row][column] == "0")
-                collision_walls.append(pygame.Rect(tile * column, tile * row, tile, tile))
         pygame.draw.circle(self.screen, "green", (x * tile, y * tile), 5)
         pygame.draw.line(self.screen, "red", (x * tile, y * tile),
                          ((x + 0.5 * math.cos(angle)) * tile, (y + 0.5 * math.sin(angle)) * tile))
+
+    def objects(self, player, MAP):
+        x, y, angle = player.pos()
+
+        sorted_objects = []
+        for obj in objects:
+            obj_x, obj_y = obj.pos()
+            sorted_objects.append([obj, (obj_y - y) ** 2 + (obj_x - x) ** 2])
+        sorted_objects.sort(key=lambda x: x[1], reverse=True)
+
+        for obj in sorted_objects:
+            obj_x, obj_y = obj[0].pos()
+
+            # Вычисляем угол к объекту
+            ray_angle = math.atan2(obj_y - y, obj_x - x)
+            ray_angle = (ray_angle + 2 * math.pi) % (2 * math.pi)
+
+            delta_angle = (ray_angle - angle + math.pi) % (2 * math.pi) - math.pi
+
+            # Проверяем, находится ли объект в поле зрения
+            if abs(delta_angle) < FOV / 2:
+                depth = self.ray_cast(player, MAP, ray_angle)[0]
+                # Вычисляем расстояние до объекта
+                object_depth = math.sqrt(obj[1])
+
+                if object_depth <= depth:
+                    # Вычисляем положение объекта на экране
+                    screen_x = (delta_angle + (FOV / 2)) * (WIDTH / FOV)
+                    obj[0].draw(self.screen, object_depth, screen_x, x, y)
+
+    def ray_cast(self, player, MAP, ray_angle):
+        x, y, angle = player.pos()
+        MAP = MAP.MAP
+
+        px = x % 1
+        py = y % 1
+        # Горизонтальные стены
+        if math.tan(ray_angle) != 0:
+            if math.sin(ray_angle) > 0:
+                xi = (1 - py) / math.tan(ray_angle)
+                dx = 1 / math.tan(ray_angle)
+                for i in range(len(MAP)):
+                    h_Px = x + xi + dx * i
+                    h_Py = y // 1 + 1 + i
+                    row, col = int(h_Py), int(h_Px // 1)
+                    if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
+                        if MAP[row][col] != "0":
+                            texture_h = self.textures[MAP[row][col]]
+                            break
+            else:
+                xi = -py / math.tan(ray_angle)
+                dx = 1 / math.tan(ray_angle)
+                for i in range(len(MAP)):
+                    h_Px = x + xi - dx * i
+                    h_Py = y // 1 - i
+                    row, col = int(h_Py) - 1, int(h_Px // 1)
+                    if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
+                        if MAP[row][col] != "0":
+                            texture_h = self.textures[MAP[row][col]]
+                            break
+        # Вертикальные стены
+        if math.cos(ray_angle) > 0:
+            yi = (1 - px) * math.tan(ray_angle)
+            dy = math.tan(ray_angle)
+            for i in range(len(MAP[0])):
+                v_Px = x // 1 + 1 + i
+                v_Py = y + yi + dy * i
+                row, col = int(v_Py // 1), int(v_Px)
+                if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
+                    if MAP[row][col] != "0":
+                        texture_v = self.textures[MAP[row][col]]
+                        break
+        else:
+            yi = px * math.tan(ray_angle)
+            dy = math.tan(ray_angle)
+            for i in range(len(MAP[0])):
+                v_Px = x // 1 - i
+                v_Py = y - yi - dy * i
+                row, col = int(v_Py // 1), int(v_Px) - 1
+                if 0 <= col < len(MAP[0]) and 0 <= row < len(MAP):
+                    if MAP[row][col] != "0":
+                        texture_v = self.textures[MAP[row][col]]
+                        break
+        # Ищем ближайщую стену пересечения основываясь на координатах h_Px, h_Py, v_Px, v_Py
+        depth_h = (x - h_Px) ** 2 + (y - h_Py) ** 2
+        depth_v = (x - v_Px) ** 2 + (y - v_Py) ** 2
+        depth, offset, texture = (depth_v, v_Py, texture_v) if depth_v < depth_h else (depth_h, h_Px, texture_h)
+        depth = math.sqrt(depth)
+        offset %= 1
+        return depth, offset, texture
