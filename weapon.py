@@ -3,146 +3,141 @@ from pathlib import Path
 from settings import *
 
 
-ak_textures = 'ak47'
-
-
 class Weapon:
-    def __init__(self, name, fullness_clip, fire_rate, reload_time, damage, max_F_C, textures):
-        self.name = name  # название
-        self.damage = damage  # Уорн за попадание
-        self.fire_rate = fire_rate  # время между выстрелами
-        self.reload_time = reload_time  # reload time
-        self.fullness_clip = fullness_clip  # количество патронов в магазине
-        self.max_F_C = max_F_C  # максимальное количество патронов в магазине
-        self.shooting = False
-        self.reloading = False
-        p = Path(f'data/weapon/{textures}')
-        for n in sorted(p.iterdir()):
-            if n == Path(f'data/weapon/{textures}/reload'):
-                self.reload_textures = [pygame.image.load(l) for l in sorted(n.iterdir())]
-
-            elif n == Path(f'data/weapon/{textures}/reload_and_aiming'):
-                self.reload_aiming_textures = [pygame.image.load(l) for l in sorted(n.iterdir())]
-
-            elif n == Path(f'data/weapon/{textures}/shoot'):
-                self.shoot_textures = [pygame.image.load(l) for l in sorted(n.iterdir())]
-
-            elif n == Path(f'data/weapon/{textures}/shoot_and_aiming'):
-                self.shoot_aiming_textures = [pygame.image.load(l) for l in sorted(n.iterdir())]
-
-            else:
-                self.aiming_textures = [pygame.image.load(l) for l in sorted(n.iterdir())]
-
+    def __init__(self, name, mag_size, fire_rate, reload_time, damage, textures_folder):
+        self.name = name
+        self.damage = damage
+        self.fire_rate = fire_rate
+        self.reload_time = reload_time
+        self.mag_size = mag_size
+        self.ammo = mag_size
+        self.is_shooting = False
+        self.is_reloading = False
+        self.is_aiming = False
         self.current_frame = 0
-        self.current_frame_image = self.shoot_textures[0]
+        self.last_shot_time = 0
+
+        self.load_textures(textures_folder)
+
+        # Скорость смены кадров
         self.delta_frame_reload = len(self.reload_textures) / (self.reload_time * FPS)
         self.delta_frame_shoot = len(self.shoot_textures) / (self.fire_rate * FPS)
 
-    def get_name(self):
-        return self.name
+        self.current_texture = self.shoot_textures[0]
 
-    def set_name(self, new_name):
-        self.name = new_name
+    def load_textures(self, folder):
+        path = Path(f'data/weapon/{folder}')
+        self.reload_textures = []
+        self.reload_aiming_textures = []
+        self.shoot_textures = []
+        self.shoot_aiming_textures = []
+        self.aiming_textures = []
 
-    def set_damage(self, num):
-        self.damage = num
+        for subfolder in path.iterdir():
+            textures = [pygame.image.load(str(img)) for img in sorted(subfolder.iterdir())]
+            match subfolder.name:
+                case 'reload': self.reload_textures = textures
+                case 'reload_and_aiming': self.reload_aiming_textures = textures
+                case 'shoot': self.shoot_textures = textures
+                case 'shoot_and_aiming': self.shoot_aiming_textures = textures
+                case _: self.aiming_textures = textures
 
-    def set_fire_rate(self, num):
-        self.fire_rate = num
+    def handle_input(self):
+        keys = pygame.key.get_pressed()
+        mouse = pygame.mouse.get_pressed()
 
-    def set_reload_time(self, num):
-        self.reload_time = num
+        if mouse[0]:
+            self.fire()
 
-    def set_fullness_clip(self, num):
-        self.fullness_clip = num
+        self.is_aiming = bool(mouse[2])
 
-    def set_max_F_C(self, num):
-        self.max_F_C = num
+        if keys[pygame.K_r]:
+            self.reload_weapon()
+
+    def fire(self):
+        if self.is_shooting or self.is_reloading or self.ammo == 0:
+            return
+
+        # Ограничение по скорострельности
+        if pygame.time.get_ticks() - self.last_shot_time < self.fire_rate * 1000:
+            return
+        pygame.mixer.music.load("data/sounds/ak47-shoot.mp3")
+        pygame.mixer.music.play()
+        self.is_shooting = True
+        self.current_frame = 0
+        self.ammo -= 1
+        self.last_shot_time = pygame.time.get_ticks()
+
+        if self.ammo == 0:
+            self.reload_weapon()
 
     def reload_weapon(self):
-        self.set_fullness_clip(self.max_F_C)
-
-    def get_frame(self):
-        return self.current_frame_image
-
-    def set_frame(self, shot_num=0, mod='s'):
-        if mod == 'r':
-            self.current_frame_image = self.reload_textures[shot_num]
-        elif mod == 'ra':
-            self.current_frame_image = self.reload_aiming_textures[shot_num]
-        elif mod == 'sa':
-            self.current_frame_image = self.shoot_aiming_textures[shot_num]
-        elif mod == 'a':
-            self.current_frame_image = self.aiming_textures[shot_num]
-        elif mod == 's':
-            self.current_frame_image = self.shoot_textures[shot_num]
-
-    def movement(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_r]:
+        if not self.is_reloading:
+            pygame.mixer.music.load("data/sounds/ak47_reload.mp3")
+            pygame.mixer.music.play()
+            self.is_reloading = True
             self.current_frame = 0
-            self.reload_weapon()
-            self.reloading = True
-        if self.reloading and self.shooting and pygame.mouse.get_pressed() == (1, 0, 0):  # попытка выстрела при выполнении перезарядки или выстрела
-            pass  # можно сделать подачу сигнала игроку, что идёт перезарядка
-        if not self.reloading and pygame.mouse.get_pressed() == (1, 0, 0):  # выполнение выстрела если не идёт перезарядка
-            if self.shooting:
-                pass
-            else:
-                self.shooting = True
+
+    def update(self):
+        if self.is_reloading:
+            textures = self.reload_aiming_textures if self.is_aiming else self.reload_textures
+            total_frames = len(textures)
+            self.current_frame += (1 / (self.reload_time * FPS)) * total_frames  # Процент выполнения анимации
+            frame_index = min(int(self.current_frame), total_frames - 1)
+            self.current_texture = textures[frame_index]
+
+            if self.current_frame >= total_frames:  # Завершение анимации
+                self.is_reloading = False
+                self.ammo = self.mag_size
                 self.current_frame = 0
-                if self.fullness_clip > 1:
-                    self.set_fullness_clip(self.fullness_clip - 1)
-                    self.shooting = True
-                elif self.fullness_clip == 1 and not self.reloading:
-                    self.set_fullness_clip(self.fullness_clip - 1)
-                    self.current_frame = 0
-                    self.reloading = True
-                    self.reload_weapon()
-                elif self.fullness_clip == 0:
-                    self.current_frame = 0
-                    self.reloading = True
-                    self.reload_weapon()
 
-    def weapon_show(self, screen):
-        s = int(self.current_frame // 1)
-        if self.shooting:
-            self.set_frame(1, 's')
-            self.current_frame += self.delta_frame_shoot
-        if self.reloading:
-            self.set_frame(s, 'r')
-            self.current_frame += self.delta_frame_reload
+        elif self.is_shooting:
+            textures = self.shoot_aiming_textures if self.is_aiming else self.shoot_textures
+            total_frames = len(textures)
+            self.current_frame += (1 / (self.fire_rate * FPS)) * total_frames
+            frame_index = min(int(self.current_frame), total_frames - 1)
+            self.current_texture = textures[frame_index]
+
+            if self.current_frame >= total_frames:
+                self.is_shooting = False
+                self.current_frame = 0
+
+        elif self.is_aiming and self.aiming_textures:
+            textures = self.aiming_textures
+            total_frames = len(textures)
+            self.current_frame += (1 / (0.2 * FPS)) * total_frames
+            frame_index = min(int(self.current_frame), total_frames - 1)
+            self.current_texture = textures[frame_index]
+
         else:
-            self.set_frame()
-        image = self.get_frame()
-        w, h = image.get_width(), image.get_height()
-        dest = (WIDTH - w, HEIGHT - h)
-        if ((self.shooting and self.current_frame >= len(self.shoot_textures)) or
-                (self.reloading and self.current_frame >= len(self.reload_textures))):
-            if self.reloading and self.current_frame >= 10:
-                self.reloading = False
-            elif self.shooting:
-                self.shooting = False
+            self.current_texture = self.shoot_textures[0]
             self.current_frame = 0
-        screen.blit(image, dest)
 
-    def weapon_fullness_clip(self, screen):
-        font1 = pygame.font.Font(None, 25)
-        font2 = pygame.font.Font(None, 25)
-        weapon_name = font2.render(f'{self.get_name()}', True, (255, 250, 0))
-        ammo = font1.render(f'{self.fullness_clip}/{self.max_F_C}', True, (255, 250, 0))
-        l = 45
-        if self.reloading:
-            ammo = font1.render('Reloading', True, (255, 250, 0))
-            l = 90
-        pygame.draw.line(screen, (250, 250, 0), (0, HEIGHT - 29), (l, HEIGHT - 29), width=3)
+    def draw(self, screen):
+        w, h = self.current_texture.get_width(), self.current_texture.get_height()
+        pos = (WIDTH - w, HEIGHT - h)
+        screen.blit(self.current_texture, pos)
+
+    def draw_ammo_info(self, screen):
+        font = pygame.font.Font(None, 25)
+        weapon_name = font.render(self.name, True, (255, 250, 0))
+        ammo_text = font.render(f"{self.ammo}/{self.mag_size}", True, (255, 250, 0))
+
+        if self.is_reloading:
+            ammo_text = font.render("Reloading...", True, (255, 250, 0))
+
+        pygame.draw.line(screen, (250, 250, 0), (0, HEIGHT - 29), (90, HEIGHT - 29), width=3)
         screen.blit(weapon_name, (0, HEIGHT - 55))
-        screen.blit(ammo, (0, HEIGHT - 25))
+        screen.blit(ammo_text, (0, HEIGHT - 25))
 
 
-class AK_47(Weapon):
-    def __init__(self, name='AK-47', fullness_clip=30, fire_rate=0.05, reload_time=2, damage=23, max_F_C=30, texturs=ak_textures):
-        super().__init__(name, fullness_clip, fire_rate, reload_time, damage, max_F_C, texturs)
-
-
-#a = AK_47()
+class AK47(Weapon):
+    def __init__(self):
+        super().__init__(
+            name="AK-47",
+            mag_size=30,
+            fire_rate=0.2,
+            reload_time=2,
+            damage=23,
+            textures_folder="ak47"
+        )

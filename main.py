@@ -20,7 +20,7 @@ if __name__ == '__main__':
     is_mouse = 1
     mouse_visible = False
     shooting = False
-    current_weapon = AK_47()
+    current_weapon = AK47()
     lastReloadTime = pygame.time.get_ticks()
     lastShootTime = pygame.time.get_ticks()
     while play:
@@ -34,15 +34,20 @@ if __name__ == '__main__':
                     mouse_visible = not mouse_visible
                     is_mouse = - is_mouse
         player.movement()
-        current_weapon.movement()
+        current_weapon.update()
         if is_mouse == 1:
             player.mouse_control()
         rendering.sky(player.angle)
         rendering.ground()
         rendering.raycasting(player, MAP)
-        current_weapon.weapon_show(screen)
+
         rendering.mini_map(player, MAP)
         rendering.fps(clock)
-        current_weapon.weapon_fullness_clip(screen)
+
+        current_weapon.handle_input()
+        current_weapon.update()
+        current_weapon.draw(screen)
+        current_weapon.draw_ammo_info(screen)
+
         pygame.display.flip()
         clock.tick(FPS)
