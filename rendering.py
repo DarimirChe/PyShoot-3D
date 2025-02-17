@@ -3,6 +3,9 @@ import math
 import pygame
 from settings import *
 from objects import objects
+from weapon import Weapon
+
+frame_count, last_time = 0, 0
 
 
 class Rendering:
