@@ -10,6 +10,7 @@ class Player:
         self.y = y
         self.angle = angle
         self.speed = PLAYER_SPEED / FPS
+        self.running_speed = PLAYER_RUNNING_SPEED / FPS
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
         self.MAP = MAP.MAP
@@ -26,6 +27,7 @@ class Player:
 
     def movement(self):
         keys = pygame.key.get_pressed()
+
         if keys[pygame.K_w]:
             dx = self.speed * math.cos(self.angle)
             dy = self.speed * math.sin(self.angle)
@@ -49,6 +51,12 @@ class Player:
         if keys[pygame.K_RIGHT]:
             self.angle += self.angle_speed
             self.angle %= -2 * math.pi
+        if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+            self.speed += 0.01
+            if self.speed >= self.running_speed:
+                self.speed = self.running_speed
+        else:
+            self.speed = PLAYER_SPEED / FPS
 
     def pos(self):
         return self.x, self.y, self.angle
