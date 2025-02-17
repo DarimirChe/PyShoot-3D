@@ -24,13 +24,6 @@ class PyButton:
             self.on_button = False
             return False
 
-    def get_pressed(self):
-        get_pressed = any(pygame.mouse.get_pressed())
-        if get_pressed and self.on_button:
-            return True
-        else:
-            return False
-
     def show_button(self):
         self.check_mouse_on()
         x, y, w, h = self.x, self.y, self.width, self.height
@@ -50,10 +43,20 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode(size)
     running = True
+    lvl_list = ['Level 1', 'Level 2', 'Level 3', 'Level 4']
+    selected_lvl = 0
 #    fon = pygame.image.load('')
-    play_button = PyButton('Play', 100, 100, 120, 60, screen)
-    lvl1 = PyButton('Level 1', 100, 100, 120, 60, screen)
-    lvl2 = PyButton('Level 2', 100, 200, 120, 60, screen)
+
+    font = pygame.font.Font(None, 60)
+    button_text = font.render(lvl_list[selected_lvl], True, (255, 255, 255))
+
+    play_button = PyButton('Play', 100, 400, 120, 60, screen)
+    exit_game_button = PyButton('Exit', 100, 500, 120, 60, screen)
+    exit_to_main_btn = PyButton('exit to main menu', 50, 50, 160, 36, screen)
+    next_lvl = PyButton('>', 1090, 150, 140, 420, screen)
+    past_lvl = PyButton('<', 50, 150, 140, 420, screen)
+    play_lvl = PyButton('Play', 570, 560, 120, 60, screen)
+
     show_play = True
     show_levels = False
     while running:
@@ -62,16 +65,36 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if event.type == pygame.MOUSEBUTTONUP and show_play:
+                if play_button.on_button:
+                    show_play = False
+                    show_levels = True
+                if exit_game_button.on_button:
+                    pygame.quit()
+                    exit()
+            elif event.type == pygame.MOUSEBUTTONUP and show_levels:
+                if exit_to_main_btn.on_button:
+                    show_play = True
+                    show_levels = False
+                if next_lvl.on_button:
+                    if selected_lvl == len(lvl_list) - 1:
+                        selected_lvl = 0
+                    else:
+                        selected_lvl += 1
+                if past_lvl.on_button:
+                    if selected_lvl == 0:
+                        selected_lvl = len(lvl_list) - 1
+                    else:
+                        selected_lvl -= 1
+            button_text = font.render(lvl_list[selected_lvl], True, (255, 255, 255))
         if show_play:
+            exit_game_button.show_button()
             play_button.show_button()
-            if play_button.get_pressed():
-                show_play = not show_play
-                show_levels = not show_levels
         if show_levels:
-            lvl1.show_button()
-            lvl2.show_button()
-            if lvl1.get_pressed() or lvl2.get_pressed():
-                show_play = not show_play
-                show_levels = not show_levels
+            screen.blit(button_text, (570, 300))
+            exit_to_main_btn.show_button()
+            next_lvl.show_button()
+            past_lvl.show_button()
+            play_lvl.show_button()
         pygame.display.flip()
         clock.tick(FPS)
