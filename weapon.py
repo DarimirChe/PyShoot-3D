@@ -119,16 +119,35 @@ class Weapon:
         screen.blit(self.current_texture, pos)
 
     def draw_ammo_info(self, screen):
-        font = pygame.font.Font(None, 25)
-        weapon_name = font.render(self.name, True, (255, 250, 0))
-        ammo_text = font.render(f"{self.ammo}/{self.mag_size}", True, (255, 250, 0))
+        font_size = 50
+        font = pygame.font.Font(None, font_size)
+
+        padding = 5
+
+        ammo_text_y = HEIGHT - padding - font_size
+        weapon_name_y = ammo_text_y - padding - font_size
+
+        weapon_name_surface = font.render(self.name, True, (255, 250, 0))
+        screen.blit(weapon_name_surface, (WIDTH - weapon_name_surface.get_width() - padding, weapon_name_y))
 
         if self.is_reloading:
-            ammo_text = font.render("Reloading...", True, (255, 250, 0))
+            ammo_text = "Перезарядка"
+        else:
+            ammo_text = f"Патронов: {self.ammo}/{self.mag_size}"
 
-        pygame.draw.line(screen, (250, 250, 0), (0, HEIGHT - 29), (90, HEIGHT - 29), width=3)
-        screen.blit(weapon_name, (0, HEIGHT - 55))
-        screen.blit(ammo_text, (0, HEIGHT - 25))
+        # Цвет текста в зависимости от количества патронов
+        if self.mag_size > 0:
+            ammo_ratio = self.ammo / self.mag_size
+            red_value = int(255 * (1 - ammo_ratio))  # Красный увеличивается при уменьшении патронов
+            green_value = int(255 * ammo_ratio)  # Зеленый уменьшается при уменьшении патронов
+        else:
+            red_value = 255
+            green_value = 0
+
+        ammo_color = (red_value, green_value, 0)
+
+        ammo_text_surface = font.render(ammo_text, True, ammo_color)
+        screen.blit(ammo_text_surface, (WIDTH - ammo_text_surface.get_width() - padding, ammo_text_y))
 
 
 class AK47(Weapon):

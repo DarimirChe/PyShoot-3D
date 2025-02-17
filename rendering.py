@@ -1,9 +1,6 @@
-import math
-
 import pygame
 from settings import *
 from objects import objects
-from weapon import Weapon
 
 frame_count, last_time = 0, 0
 
@@ -85,6 +82,26 @@ class Rendering:
                     # Вычисляем положение объекта на экране
                     screen_x = (delta_angle + (FOV / 2)) * (WIDTH / FOV)
                     obj[0].draw(self.screen, object_depth, screen_x, x, y)
+
+    def health(self, current_health, max_health):
+        font_size = 50
+        padding = 5
+        font = pygame.font.Font(None, font_size)
+
+        # Определяем цвет текста в зависимости от уровня здоровья
+        if max_health > 0:
+            health_ratio = current_health / max_health
+            red_value = int(255 * (1 - health_ratio))  # Красный увеличивается при уменьшении здоровья
+            green_value = int(255 * health_ratio)  # Зеленый уменьшается при уменьшении здоровья
+        else:
+            red_value = 255
+            green_value = 0
+
+        health_color = (red_value, green_value, 0)  # Переход от зеленого к красному
+
+        # Отображаем текущее здоровье
+        health_text = font.render(f"Здоровье: {current_health}", True, health_color)
+        self.screen.blit(health_text, (10, HEIGHT - font_size - padding))  # Позиция в левом нижнем углу с отступом
 
     def ray_cast(self, player, MAP, ray_angle):
         x, y, angle = player.pos()

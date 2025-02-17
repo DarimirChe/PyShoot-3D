@@ -1,7 +1,6 @@
 import pygame
 from settings import *
 import math
-from map import Map
 
 
 class Player:
@@ -14,6 +13,8 @@ class Player:
         self.angle_speed = PLAYER_ANGLE_SPEED / FPS
         self.sensitivity = MOUSE_SENSITIVITY
         self.MAP = MAP.MAP
+        self.max_health = MAX_HEALTH
+        self.health = self.max_health
         #self.map_edge_y = len(self.MAP)
         #self.map_edge_x = len(self.MAP[0])
 

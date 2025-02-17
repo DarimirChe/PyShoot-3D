@@ -53,5 +53,7 @@ if __name__ == '__main__':
         current_weapon.draw(screen)
         current_weapon.draw_ammo_info(screen)
 
+        rendering.health(player.health, player.max_health)
+
         pygame.display.flip()
         clock.tick(FPS)
