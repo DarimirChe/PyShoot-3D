@@ -71,7 +71,7 @@ if __name__ == '__main__':
                         obj.update()
                         obj.movement(player, MAP)
                         win = False
-            if win:
+            if win and False:
                 end_time = time.time()
                 mode = win_window(screen, clock, FPS, end_time - start_time)
                 mouse_visible = True
