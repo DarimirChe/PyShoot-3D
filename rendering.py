@@ -13,6 +13,18 @@ class Rendering:
         self.screen = screen
         self.textures = {"1": pygame.image.load('data/textures/walls/1.jpg').convert(),
                          "2": pygame.image.load('data/textures/walls/2.jpg').convert(),
+                         "3": pygame.image.load('data/textures/walls/3.jpg').convert(),
+                         "4": pygame.image.load('data/textures/walls/4.jpg').convert(),
+                         "5": pygame.image.load('data/textures/walls/5.jpg').convert(),
+                         "6": pygame.image.load('data/textures/walls/6.jpg').convert(),
+                         "7": pygame.image.load('data/textures/walls/7.jpg').convert(),
+                         "8": pygame.image.load('data/textures/walls/8.jpg').convert(),
+                         "9": pygame.image.load('data/textures/walls/9.jpg').convert(),
+                         "a": pygame.image.load('data/textures/walls/a.jpg').convert(),
+                         "b": pygame.image.load('data/textures/walls/b.jpg').convert(),
+                         "d": pygame.image.load('data/textures/walls/d.jpg').convert(),
+                         "e": pygame.image.load('data/textures/walls/e.jpg').convert(),
+                         "f": pygame.image.load('data/textures/walls/f.jpg').convert(),
                          "Sky": pygame.image.load('data/textures/sky/sky.jpg').convert()
                          }
 
