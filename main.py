@@ -2,60 +2,77 @@ from player import Player
 from map import Map
 from rendering import Rendering
 from weapon import *
-from objects import objects
+from main_menu import main_menu
+from select_level import select_level
+from pause_menu import pause_menu
+from levels import levels
 
 if __name__ == '__main__':
     pygame.init()
-    speed = PLAYER_SPEED
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('PyShoot 3D')
     clock = pygame.time.Clock()
     MAP = Map()
-    MAP.set_map("data/maps/map.txt")
-    player = Player(2, 6, 0, MAP)
-    rendering = Rendering(screen)
+    is_open = True
 
-    play = True
-    is_mouse = 1
-    mouse_visible = False
-
-    current_weapon = AK47(player, rendering, MAP)
-
-    while play:
-        pygame.mouse.set_visible(mouse_visible)
+    while is_open:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if event.type == pygame.KEYDOWN:
-                if pygame.key.get_pressed()[pygame.K_ESCAPE]:
-                    mouse_visible = not mouse_visible
-                    is_mouse = - is_mouse
 
-        if is_mouse == 1:
-            player.mouse_control()
+        level_index = None
+        while level_index is None:
+            main_menu(screen, clock, FPS)
+            level_index = select_level(screen, clock, FPS)
 
-        for obj in objects:
-            if hasattr(obj, "movement"):
-                if obj.is_alive:
-                    obj.movement(player, MAP)
-                    obj.update()
+        level = levels[level_index]
 
-        player.movement()
+        MAP.set_map(f"data/maps/{level["map"]}")
+        player = Player(*level["player_position"], MAP)
 
-        rendering.sky(player.angle)
-        rendering.ground()
-        rendering.raycasting(player, MAP)
-        rendering.objects(player, MAP)
+        rendering = Rendering(screen)
+        play = True
+        is_mouse = 1
+        mouse_visible = False
+        current_weapon = AK47()
 
-        rendering.mini_map(player, MAP)
-        rendering.fps(clock)
+        while play:
+            pygame.mouse.set_visible(mouse_visible)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                        #mouse_visible = not mouse_visible
+                        #is_mouse = - is_mouse
+                        pygame.mouse.set_visible(True)
 
-        current_weapon.handle_input()
-        current_weapon.update()
-        current_weapon.draw(screen)
-        current_weapon.draw_ammo_info(screen)
+                        mode = pause_menu(screen, clock, FPS)
+                        if mode == "resume":
+                            pygame.mouse.set_visible(False)
+                        elif mode == "main_menu":
+                            play = False
 
-        rendering.health(player.health, player.max_health)
+            player.movement()
+            current_weapon.update()
+            if is_mouse == 1:
+                player.mouse_control()
+            rendering.sky(player.angle)
+            rendering.ground()
+            rendering.raycasting(player, MAP)
+            rendering.objects(player, MAP)
 
-        pygame.display.flip()
-        clock.tick(FPS)
+            rendering.mini_map(player, MAP)
+            rendering.fps(clock)
+
+            current_weapon.handle_input()
+            current_weapon.update()
+            current_weapon.draw(screen)
+            current_weapon.draw_ammo_info(screen)
+
+            rendering.health(player.health, player.max_health)
+
+            pygame.display.flip()
+            clock.tick(FPS)
