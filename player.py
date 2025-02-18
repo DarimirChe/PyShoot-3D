@@ -15,8 +15,6 @@ class Player:
         self.MAP = MAP.MAP
         self.max_health = MAX_HEALTH
         self.health = self.max_health
-        #self.map_edge_y = len(self.MAP)
-        #self.map_edge_x = len(self.MAP[0])
 
     def detect_collision(self, dx, dy):
         radius = 0.1 if dx > 0 else -0.1

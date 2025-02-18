@@ -2,8 +2,6 @@ import pygame
 from settings import *
 from objects import objects
 
-#frame_count, last_time = 0, 0
-
 
 class Rendering:
     def __init__(self, screen):

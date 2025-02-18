@@ -104,10 +104,8 @@ class Weapon:
             alfa = math.atan2(obj[0].size / 2, obj[1])
             thetta = angle + delta_angle
             if thetta - alfa <= angle <= thetta + alfa:
-                print(obj[1], self.rendering.ray_cast(self.player, self.MAP, angle)[0])
                 if math.sqrt(obj[1]) <= self.rendering.ray_cast(self.player, self.MAP, angle)[0]:
                     obj[0].health -= self.damage
-                    print("попадание", obj)
                     return
 
     def reload_weapon(self):

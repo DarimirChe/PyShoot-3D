@@ -37,7 +37,7 @@ if __name__ == '__main__':
         for obj in objects:
             if hasattr(obj, "movement"):
                 if obj.is_alive:
-                    obj.movement(player)
+                    obj.movement(player, MAP)
                     obj.update()
 
         player.movement()
