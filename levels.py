@@ -3,6 +3,7 @@ from objects import *
 levels = [
     {
         "name": "Коробка",
+        "background": "box.png",
         "map": "Box.txt",
         "player_position": (12, 12, 0),
         "sky": "Sky",
@@ -14,6 +15,7 @@ levels = [
     },
     {
         "name": "Поле",
+        "background": "field.png",
         "map": "Field.txt",
         "player_position": (3, 3, 0),
         "sky": "Sky",
@@ -25,6 +27,7 @@ levels = [
     },
     {
         "name": "Лесной особняк",
+        "background": "mansion.png",
         "map": "Forest_Mansion.txt",
         "player_position": (14, 8, 0),
         "sky": "Sky",
@@ -36,6 +39,7 @@ levels = [
     },
     {
         "name": "Госпиталь",
+        "background": "hospital.png",
         "map": "Hospital.txt",
         "player_position": (2, 1.5, 0),
         "sky": "Sky",
@@ -47,6 +51,7 @@ levels = [
     },
     {
         "name": "Деревня",
+        "background": "village.png",
         "map": "Village.txt",
         "player_position": (4, 3, 0),
         "sky": "Sky",
