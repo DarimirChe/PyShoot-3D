@@ -5,7 +5,10 @@ from weapon import *
 from main_menu import main_menu
 from select_level import select_level
 from pause_menu import pause_menu
+from win_window import win_window
+from defeat_window import defeat_window
 from levels import levels
+import time
 
 if __name__ == '__main__':
     pygame.init()
@@ -28,15 +31,18 @@ if __name__ == '__main__':
 
         level = levels[level_index]
 
+        objects = level["objects"]
+
         MAP.set_map(f"data/maps/{level["map"]}")
         player = Player(*level["player_position"], MAP)
 
-        rendering = Rendering(screen)
+        rendering = Rendering(screen, objects)
         play = True
         is_mouse = 1
         mouse_visible = False
-        current_weapon = AK47()
+        current_weapon = AK47(player, rendering, MAP, objects)
 
+        start_time = time.time()
         while play:
             pygame.mouse.set_visible(mouse_visible)
             for event in pygame.event.get():
@@ -55,10 +61,30 @@ if __name__ == '__main__':
                         elif mode == "main_menu":
                             play = False
 
-            player.movement()
-            current_weapon.update()
             if is_mouse == 1:
                 player.mouse_control()
+
+            win = True
+            for obj in objects:
+                if hasattr(obj, "is_alive"):
+                    if obj.is_alive:
+                        obj.update()
+                        obj.movement(player, MAP)
+                        win = False
+            if win:
+                end_time = time.time()
+                mode = win_window(screen, clock, FPS, end_time - start_time)
+                mouse_visible = True
+                pygame.mouse.set_visible(True)
+                if mode == "main_menu":
+                    play = False
+            if player.health == 0:
+                mode = defeat_window(screen, clock, FPS)
+                if mode == "main_menu":
+                    play = False
+
+            player.movement()
+
             rendering.sky(player.angle)
             rendering.ground()
             rendering.raycasting(player, MAP)
@@ -67,6 +93,7 @@ if __name__ == '__main__':
             rendering.mini_map(player, MAP)
             rendering.fps(clock)
 
+            current_weapon.update()
             current_weapon.handle_input()
             current_weapon.update()
             current_weapon.draw(screen)

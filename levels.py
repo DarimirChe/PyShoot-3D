@@ -5,12 +5,14 @@ levels = [
         "name": "Коробка",
         "background": "box.png",
         "map": "Box.txt",
-        "player_position": (12, 12, 0),
+        "player_position": (12, 6.5, 0),
         "sky": "Sky",
         "ground": (80, 111, 80),
         "objects": [
-            Barrel(2, 2),
-            Barrel(7, 7),
+            Pin(2, 2, 10, 50, 2, 0.35, speed=2),
+            Pin(2, 11, 10, 50, 2, 0.35, speed=2),
+            Pin(23, 2, 10, 50, 2, 0.35, speed=2),
+            Pin(23, 11, 10, 50, 2, 0.35, speed=2),
         ]
     },
     {

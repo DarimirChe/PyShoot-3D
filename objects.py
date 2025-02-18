@@ -133,7 +133,7 @@ class Pin(Enemy):
         texture_paths = [f'data/textures/objects/pin/{i}.png' for i in range(8)]
         super().__init__(x, y, texture_paths, damage, health, reload_time, animation_time, angle, speed, wall_collision)
 
-
+'''
 objects = [
     Barrel(5, 5),
     Barrel(3, 4),
@@ -144,3 +144,4 @@ objects = [
     Pin(7, 7, 10, 50, 2, 0.35, speed=2),
     Pin(7, 2, 10, 50, 2, 0.35, speed=2)
 ]
+'''

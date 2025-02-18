@@ -1,10 +1,10 @@
 import pygame
 from settings import *
-from objects import objects
+#from objects import objects
 
 
 class Rendering:
-    def __init__(self, screen):
+    def __init__(self, screen, objects):
         self.screen = screen
         self.textures = {"1": pygame.image.load('data/textures/walls/1.jpg').convert(),
                          "2": pygame.image.load('data/textures/walls/2.jpg').convert(),
@@ -22,6 +22,7 @@ class Rendering:
                          "f": pygame.image.load('data/textures/walls/f.jpg').convert(),
                          "Sky": pygame.image.load('data/textures/sky/sky.jpg').convert()
                          }
+        self.objects_list = objects
 
     def raycasting(self, player, MAP):
         x, y, angle = player.pos()
@@ -66,9 +67,8 @@ class Rendering:
 
     def objects(self, player, MAP):
         x, y, angle = player.pos()
-
         sorted_objects = []
-        for obj in objects:
+        for obj in self.objects_list:
             if hasattr(obj, "is_alive"):
                 if not obj.is_alive:
                     continue

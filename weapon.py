@@ -1,11 +1,11 @@
 import pygame
 from pathlib import Path
 from settings import *
-from objects import objects
+#from objects import objects
 
 
 class Weapon:
-    def __init__(self, name, mag_size, fire_rate, reload_time, damage, textures_folder, player, rendering, MAP):
+    def __init__(self, name, mag_size, fire_rate, reload_time, damage, textures_folder, player, rendering, MAP, objects):
         self.name = name
         self.damage = damage
         self.fire_rate = fire_rate
@@ -29,6 +29,7 @@ class Weapon:
         self.player = player
         self.rendering = rendering
         self.MAP = MAP
+        self.objects = objects
 
     def load_textures(self, folder):
         path = Path(f'data/weapon/{folder}')
@@ -85,7 +86,7 @@ class Weapon:
         x, y, angle = self.player.pos()
 
         sorted_objects = []
-        for obj in objects:
+        for obj in self.objects:
             if hasattr(obj, "is_alive"):
                 if not obj.is_alive:
                     continue
@@ -189,7 +190,7 @@ class Weapon:
 
 
 class AK47(Weapon):
-    def __init__(self, player, rendering, MAP):
+    def __init__(self, player, rendering, MAP, objects):
         super().__init__(
             name="AK-47",
             mag_size=30,
@@ -199,5 +200,6 @@ class AK47(Weapon):
             textures_folder="ak47",
             player=player,
             rendering=rendering,
-            MAP=MAP
+            MAP=MAP,
+            objects=objects
         )
