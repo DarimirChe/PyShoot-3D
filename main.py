@@ -18,7 +18,7 @@ if __name__ == '__main__':
     is_mouse = 1
     mouse_visible = False
 
-    current_weapon = AK47()
+    current_weapon = AK47(player, rendering, MAP)
 
     while play:
         pygame.mouse.set_visible(mouse_visible)
@@ -35,8 +35,10 @@ if __name__ == '__main__':
             player.mouse_control()
 
         for obj in objects:
-            if hasattr(obj, 'movement'):
-                obj.movement(player)
+            if hasattr(obj, "movement"):
+                if obj.is_alive:
+                    obj.movement(player)
+                    obj.update()
 
         player.movement()
 

@@ -2,7 +2,7 @@ import pygame
 from settings import *
 from objects import objects
 
-frame_count, last_time = 0, 0
+#frame_count, last_time = 0, 0
 
 
 class Rendering:
@@ -59,11 +59,14 @@ class Rendering:
 
         sorted_objects = []
         for obj in objects:
+            if hasattr(obj, "is_alive"):
+                if not obj.is_alive:
+                    continue
             obj_x, obj_y = obj.pos()
             sorted_objects.append([obj, (obj_y - y) ** 2 + (obj_x - x) ** 2])
-        sorted_objects.sort(key=lambda x: x[1], reverse=True)
+        sorted_objects.sort(key=lambda x: x[1])
 
-        for obj in sorted_objects:
+        for obj in sorted_objects[::-1]:
             obj_x, obj_y = obj[0].pos()
 
             # Вычисляем угол к объекту

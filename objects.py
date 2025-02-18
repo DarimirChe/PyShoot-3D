@@ -43,6 +43,11 @@ class Enemy(Object):
         self.reload_time = reload_time
         self.frame = reload_time / FPS
         self.frame_count = 0
+        self.is_alive = True
+        self.size = self.texture_width / 256
+        self.animation_time = 1
+        self.delta_frame = self.num_textures / (self.animation_time * FPS)
+        self.current_frame = 0
 
     def movement(self, player):
         p_x, p_y, _ = player.pos()
@@ -67,6 +72,32 @@ class Enemy(Object):
         if self.frame_count <= self.reload_time:
             self.frame_count += self.frame
 
+    def update(self):
+        if self.health <= 0:
+            self.is_alive = False
+            return
+
+        self.current_frame += self.delta_frame
+        self.current_frame %= self.num_textures
+
+    def draw(self, screen, depth, screen_x, player_x, player_y):
+        proj_height = PROJ_COEFF / depth
+
+        # view_angle = math.atan2(player_y - self.y, player_x - self.x)
+        # relative_angle = (view_angle - self.angle) % (2 * math.pi)
+
+        # angle_step = 2 * math.pi / self.num_textures
+        # texture_index = int(relative_angle // angle_step) % self.num_textures
+
+        scaled_texture = pygame.transform.scale(
+            self.textures[int(self.current_frame)],
+            (self.texture_width * (proj_height / self.texture_height), proj_height)
+        )
+
+        screen.blit(
+            scaled_texture, (screen_x - scaled_texture.get_width() / 2, HEIGHT / 2 - proj_height / 2)
+        )
+
 
 class Barrel(Object):
     def __init__(self, x, y):
@@ -76,7 +107,8 @@ class Barrel(Object):
 
 class Devil(Enemy):
     def __init__(self, x, y, damage, health, reload_time, angle=0, speed=PLAYER_SPEED):
-        texture_paths = [f'data/textures/objects/devil/{i}.png' for i in range(8)]
+        texture_paths = [f'data/textures/objects/devil/{i}.png' for i in range(
+            8)]  # ['data/textures/objects/devil/devil.png']#[f'data/textures/objects/devil/{i}.png' for i in range(8)]
         super().__init__(x, y, texture_paths, damage, health, reload_time, angle, speed)
 
 
@@ -86,11 +118,19 @@ class Ghost(Enemy):
         super().__init__(x, y, texture_paths, damage, health, reload_time, angle, speed)
 
 
+class Pin(Enemy):
+    def __init__(self, x, y, damage, health, reload_time, angle=0, speed=PLAYER_SPEED):
+        texture_paths = [f'data/textures/objects/pin/{i}.png' for i in range(8)]
+        super().__init__(x, y, texture_paths, damage, health, reload_time, angle, speed)
+
+
 objects = [
     Barrel(5, 5),
     Barrel(3, 4),
     Devil(21, 10, 20, 100, 2, speed=1.5),
     Barrel(22, 2),
-    Devil(1.5, 9.5, 20, 100, 2, speed=1.5),
-    Ghost(21, 5, 5, 30, 1.5,  speed=PLAYER_RUNNING_SPEED)
+    Devil(1.5, 9.5, 20, 100, 3, speed=1.5),
+    Ghost(22, 4.5, 5, 20, 1, speed=PLAYER_RUNNING_SPEED),
+    Pin(7, 7, 10, 50, 2, speed=2),
+    Pin(7, 2, 10, 50, 2, speed=2)
 ]

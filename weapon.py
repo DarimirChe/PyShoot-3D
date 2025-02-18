@@ -1,10 +1,11 @@
 import pygame
 from pathlib import Path
 from settings import *
+from objects import objects
 
 
 class Weapon:
-    def __init__(self, name, mag_size, fire_rate, reload_time, damage, textures_folder):
+    def __init__(self, name, mag_size, fire_rate, reload_time, damage, textures_folder, player, rendering, MAP):
         self.name = name
         self.damage = damage
         self.fire_rate = fire_rate
@@ -25,6 +26,10 @@ class Weapon:
 
         self.current_texture = self.shoot_textures[0]
 
+        self.player = player
+        self.rendering = rendering
+        self.MAP = MAP
+
     def load_textures(self, folder):
         path = Path(f'data/weapon/{folder}')
         self.reload_textures = []
@@ -36,11 +41,16 @@ class Weapon:
         for subfolder in path.iterdir():
             textures = [pygame.image.load(str(img)) for img in sorted(subfolder.iterdir())]
             match subfolder.name:
-                case 'reload': self.reload_textures = textures
-                case 'reload_and_aiming': self.reload_aiming_textures = textures
-                case 'shoot': self.shoot_textures = textures
-                case 'shoot_and_aiming': self.shoot_aiming_textures = textures
-                case _: self.aiming_textures = textures
+                case 'reload':
+                    self.reload_textures = textures
+                case 'reload_and_aiming':
+                    self.reload_aiming_textures = textures
+                case 'shoot':
+                    self.shoot_textures = textures
+                case 'shoot_and_aiming':
+                    self.shoot_aiming_textures = textures
+                case _:
+                    self.aiming_textures = textures
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
@@ -61,6 +71,7 @@ class Weapon:
         # Ограничение по скорострельности
         if pygame.time.get_ticks() - self.last_shot_time < self.fire_rate * 1000:
             return
+
         pygame.mixer.music.load("data/sounds/ak47-shoot.mp3")
         pygame.mixer.music.play()
         self.is_shooting = True
@@ -70,6 +81,34 @@ class Weapon:
 
         if self.ammo == 0:
             self.reload_weapon()
+
+        x, y, angle = self.player.pos()
+
+        sorted_objects = []
+        for obj in objects:
+            if hasattr(obj, "is_alive"):
+                if not obj.is_alive:
+                    continue
+            else:
+                continue
+            obj_x, obj_y = obj.pos()
+            sorted_objects.append([obj, (obj_y - y) ** 2 + (obj_x - x) ** 2])
+        sorted_objects.sort(key=lambda x: x[1])
+
+        for obj in sorted_objects:
+            obj_x, obj_y = obj[0].pos()
+            # Вычисляем угол к объекту
+            ray_angle = math.atan2(obj_y - y, obj_x - x)
+            ray_angle = (ray_angle + 2 * math.pi) % (2 * math.pi)
+            delta_angle = (ray_angle - angle + math.pi) % (2 * math.pi) - math.pi
+            alfa = math.atan2(obj[0].size / 2, obj[1])
+            thetta = angle + delta_angle
+            if thetta - alfa <= angle <= thetta + alfa:
+                print(obj[1], self.rendering.ray_cast(self.player, self.MAP, angle)[0])
+                if math.sqrt(obj[1]) <= self.rendering.ray_cast(self.player, self.MAP, angle)[0]:
+                    obj[0].health -= self.damage
+                    print("попадание", obj)
+                    return
 
     def reload_weapon(self):
         if not self.is_reloading:
@@ -101,14 +140,12 @@ class Weapon:
             if self.current_frame >= total_frames:
                 self.is_shooting = False
                 self.current_frame = 0
-
         elif self.is_aiming and self.aiming_textures:
             textures = self.aiming_textures
             total_frames = len(textures)
             self.current_frame += (1 / (0.2 * FPS)) * total_frames
             frame_index = min(int(self.current_frame), total_frames - 1)
             self.current_texture = textures[frame_index]
-
         else:
             self.current_texture = self.shoot_textures[0]
             self.current_frame = 0
@@ -151,12 +188,15 @@ class Weapon:
 
 
 class AK47(Weapon):
-    def __init__(self):
+    def __init__(self, player, rendering, MAP):
         super().__init__(
             name="AK-47",
             mag_size=30,
             fire_rate=0.2,
             reload_time=2,
             damage=23,
-            textures_folder="ak47"
+            textures_folder="ak47",
+            player=player,
+            rendering=rendering,
+            MAP=MAP
         )
