@@ -97,14 +97,17 @@ class Weapon:
 
         for obj in sorted_objects:
             obj_x, obj_y = obj[0].pos()
-            # Вычисляем угол к объекту
+            distance = math.sqrt(obj[1])
+
             ray_angle = math.atan2(obj_y - y, obj_x - x)
             ray_angle = (ray_angle + 2 * math.pi) % (2 * math.pi)
+
             delta_angle = (ray_angle - angle + math.pi) % (2 * math.pi) - math.pi
-            alfa = math.atan2(obj[0].size / 2, obj[1])
-            thetta = angle + delta_angle
-            if thetta - alfa <= angle <= thetta + alfa:
-                if math.sqrt(obj[1]) <= self.rendering.ray_cast(self.player, self.MAP, angle)[0]:
+
+            alfa = math.atan2(obj[0].size / 2, distance)
+
+            if abs(delta_angle) <= alfa:
+                if distance <= self.rendering.ray_cast(self.player, self.MAP, angle)[0]:
                     obj[0].health -= self.damage
                     return
 
